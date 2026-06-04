@@ -13,7 +13,6 @@
             min-height: 100vh; touch-action: manipulation;
         }
         
-        /* Fully Fluid Layout Container */
         #gameApp {
             width: 100vw;
             height: 100vh;
@@ -29,7 +28,6 @@
             padding: 15px;
         }
 
-        /* Desktop & Large Tablet Enhancements */
         @media (min-width: 768px) and (min-height: 600px) {
             #gameApp {
                 height: auto;
@@ -46,7 +44,6 @@
         h1 { color: #2B8A3E; font-size: 1.8rem; margin: 0 0 10px 0; text-align: center; }
         p { color: #495057; font-size: 1.1rem; margin: 0 0 20px 0; text-align: center; }
         
-        /* Fixed Progress Bar Header */
         .score-bar { 
             width: 100%;
             font-size: 1.2rem; 
@@ -57,7 +54,7 @@
             flex-shrink: 0;
         }
         
-        /* Auto-scaling Picture Frame */
+        /* Interactive Graphic Frame with Sync Visibility Controls */
         .scenario-graphic-card {
             background: #f8f9fa; 
             border: 4px solid #0EA5E9; 
@@ -74,18 +71,38 @@
             position: relative; 
             box-shadow: 0 6px 15px rgba(0,0,0,0.05);
             box-sizing: border-box;
+            padding: 10px;
         }
+
+        /* This wrapper ensures the image and its text fallback stay synced */
+        .sync-content-wrapper {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            opacity: 0; /* Hidden by default until loaded */
+            transition: opacity 0.2s ease-in-out;
+        }
+
+        /* When ready, this class is added to reveal everything instantly together */
+        .sync-content-wrapper.ready {
+            opacity: 1;
+        }
+
         .scenario-img {
             width: 100%; height: 100%; object-fit: contain; position: absolute; top:0; left:0; z-index: 2;
         }
+        
+        /* Text acts as a clean caption underneath if image fails */
         .fallback-box {
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            z-index: 1; text-align: center; padding: 10px;
+            z-index: 1; text-align: center; width: 100%; height: 100%;
         }
         .fallback-emoji { font-size: 3rem; margin-bottom: 5px; }
         .fallback-text { font-size: 1.1rem; font-weight: bold; color: #212529; line-height: 1.3; }
         
-        /* Audio Button Row */
         .audio-control-deck { margin: 8px 0; flex-shrink: 0; }
         .audio-btn-whole {
             background: #E6FFFA; border: 2px solid #0EA5E9; border-radius: 12px;
@@ -94,7 +111,6 @@
             box-shadow: 0 4px 6px rgba(0,0,0,0.05);
         }
         
-        /* Wrap Choices Fluidly Based on Orientation */
         .choices-grid { 
             display: flex; 
             justify-content: center; 
@@ -133,7 +149,6 @@
         }
         .feedback-text { font-size: 2rem; font-weight: bold; margin-top: 15px; }
 
-        /* 📱 VERTICAL PORTRAIT OPTIMIZATION */
         @media (max-width: 480px) and (orientation: portrait) {
             h1 { font-size: 1.6rem; }
             .scenario-graphic-card { max-height: 45vh; }
@@ -142,7 +157,6 @@
             .choice-icon { font-size: 1.7rem; }
         }
 
-        /* 📱 HORIZONTAL LANDSCAPE OPTIMIZATION */
         @media (max-height: 450px) and (orientation: landscape) {
             #gameApp { padding: 6px 12px; }
             h1 { font-size: 1.3rem; margin-bottom: 2px; }
@@ -175,11 +189,14 @@
         <div class="score-bar" id="scoreDisplay">🌟 得分: 0 / 5</div>
         
         <div class="scenario-graphic-card">
-            <div class="fallback-box">
-                <div class="fallback-emoji" id="scenEmoji">✏️</div>
-                <div class="fallback-text" id="scenText">載入中...</div>
+            <!-- This container holds everything inside until sync conditions are met -->
+            <div id="syncWrapper" class="sync-content-wrapper">
+                <div class="fallback-box">
+                    <div class="fallback-emoji" id="scenEmoji">✏️</div>
+                    <div class="fallback-text" id="scenText">載入中...</div>
+                </div>
+                <img src="" id="scenImage" class="scenario-img" alt="Scenario Graphic" onerror="handleImageError()" onload="handleImageSuccess()">
             </div>
-            <img src="" id="scenImage" class="scenario-img" alt="Scenario Graphic" onerror="handleImageError()" onload="handleImageSuccess()">
         </div>
         
         <div class="audio-control-deck">
@@ -230,11 +247,15 @@ let score = 0;
 let activeAudio = null;
 
 function handleImageError() {
+    // If image fails, hide it and reveal the caption layout instantly
     document.getElementById('scenImage').style.display = 'none';
+    document.getElementById('syncWrapper').classList.add('ready');
 }
 
 function handleImageSuccess() {
+    // If image loads successfully, show it and reveal the full box instantly
     document.getElementById('scenImage').style.display = 'block';
+    document.getElementById('syncWrapper').classList.add('ready');
 }
 
 function playAudioFile(fileName) {
@@ -267,9 +288,14 @@ function nextRound() {
     document.getElementById('scoreDisplay').innerText = `🌟 得分: ${score} / 5`;
     currentItem = gameActiveList.pop();
     
+    // 1. Hide the wrapper completely before altering content
+    document.getElementById('syncWrapper').classList.remove('ready');
+    
+    // 2. Set backend values
     document.getElementById('scenEmoji').innerText = currentItem.emoji;
     document.getElementById('scenText').innerText = currentItem.text;
     
+    // 3. Update image target path (triggers onload/onerror when ready)
     const imgElement = document.getElementById('scenImage');
     imgElement.style.display = 'none'; 
     imgElement.src = AUDIO_FOLDER + currentItem.imgFile;
@@ -317,7 +343,7 @@ function handleChoiceSelection(selectedPhrase) {
         score++; fEmoji.innerText = "👍"; fMsg.innerText = "啱喇！";
         fMsg.style.color = "#2B8A3E"; playAudioFile('success.mp3');
     } else {
-        fEmoji.innerText = "❤️"; fMsg.innerText = "再聽多次？";
+        fEmoji.innerText = "❤️"; fMsg.innerText = "再聽多一次？";
         fMsg.style.color = "#C92A2A"; playAudioFile('fail.mp3');
     }
 
