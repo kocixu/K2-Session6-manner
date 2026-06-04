@@ -18,7 +18,6 @@
             touch-action: manipulation;
         }
         
-        /* Fully Responsive Flexible Aspect Container for Mobile / Tablets */
         #gameApp {
             width: 100%;
             max-width: 960px;
@@ -32,10 +31,9 @@
             align-items: center;
             justify-content: space-between;
             box-sizing: border-box;
-            padding: 2vh 4vw;
+            padding: 3vh 4vw;
         }
 
-        /* Responsive scaling handling down to tiny viewports */
         @media (max-aspect-ratio: 16/9) {
             #gameApp {
                 width: 95vw;
@@ -64,13 +62,13 @@
             margin-bottom: 0.5vh;
         }
 
-        /* Dynamic Scenario Section */
+        /* Top Scenario Box */
         .scenario-container {
             background: #f8f9fa;
             border: 3px solid #dee2e6;
             border-radius: 16px;
             width: 90%;
-            padding: 1.5vh 2vw;
+            padding: 2vh 2vw;
             text-align: center;
             display: flex;
             flex-direction: column;
@@ -79,34 +77,27 @@
         .scenario-emoji { font-size: 6vh; margin-bottom: 0.5vh; line-height: 1; }
         .scenario-text { font-size: 2.8vh; font-weight: bold; color: #212529; line-height: 1.3; }
         
-        /* Three Playback Control Unit */
+        /* Single Replay Button Layout */
         .audio-control-deck {
-            display: flex;
-            justify-content: center;
-            gap: 1.5vw;
             margin-top: 1.5vh;
-            width: 100%;
         }
-        .audio-btn {
-            background: #E3FAFC;
-            border: 2px solid #15AABF;
+        .audio-btn-whole {
+            background: #E6FFFA;
+            border: 2px solid #0EA5E9;
             border-radius: 12px;
-            padding: 1vh 1.5vw;
-            color: #15AABF;
+            padding: 1vh 2.5vw;
+            color: #0EA5E9;
             font-weight: bold;
-            font-size: 1.8vh;
+            font-size: 2vh;
             cursor: pointer;
             display: flex;
             align-items: center;
             gap: 0.5vw;
             box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-            transition: background 0.1s;
         }
-        .audio-btn:active { background: #C5F6FA; }
-        .audio-btn.whole { background: #E6FFFA; border-color: #0EA5E9; color: #0EA5E9; }
-        .audio-btn.whole:active { background: #CCFBF1; }
+        .audio-btn-whole:active { background: #CCFBF1; }
 
-        /* Bottom Response Row */
+        /* Bottom Choices Grid */
         .choices-grid {
             display: flex;
             justify-content: center;
@@ -119,17 +110,46 @@
             border-radius: 16px;
             flex: 1;
             max-width: 240px;
-            height: 18vh;
+            height: 20vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1.5vh 0;
+            cursor: pointer;
+            box-shadow: 0 6px 15px rgba(0,0,0,0.06);
+            box-sizing: border-box;
+            position: relative;
+        }
+        .choice-main-content {
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            cursor: pointer;
-            box-shadow: 0 6px 15px rgba(0,0,0,0.06);
-            box-sizing: border-box;
+            flex-grow: 1;
         }
-        .choice-icon { font-size: 4vh; margin-bottom: 0.5vh; }
+        .choice-icon { font-size: 4vh; margin-bottom: 0.2vh; }
         .choice-text { font-size: 3.5vh; font-weight: bold; color: #ffffff; text-shadow: 0 2px 4px rgba(0,0,0,0.15); }
+        
+        /* Speaker Button Inside Choice Card */
+        .speaker-bubble {
+            background: rgba(255, 255, 255, 0.25);
+            border: 2px solid #ffffff;
+            border-radius: 50%;
+            width: 4.5vh;
+            height: 4.5vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.2vh;
+            color: #ffffff;
+            margin-top: 0.5vh;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: background 0.1s;
+        }
+        .speaker-bubble:active {
+            background: rgba(255, 255, 255, 0.5);
+        }
 
         .btn-prime {
             background: #10B981;
@@ -161,44 +181,44 @@
 
 <div id="gameApp">
     
+    <!-- START SCREEN -->
     <div id="startScreen" class="screen active">
         <h1>超級說話小隊! 🚀</h1>
         <p>睇下發生咩事，幫小朋友揀個啱嘅禮貌回應啦！</p>
         <button class="btn-prime" onclick="startGame()">開始遊戲</button>
     </div>
 
+    <!-- MAIN PLAYING SCREEN -->
     <div id="playScreen" class="screen">
         <div class="score-bar" id="scoreDisplay">🌟 得分: 0 / 5</div>
         
+        <!-- Scenario Box -->
         <div class="scenario-container">
             <div class="scenario-emoji" id="scenEmoji">🏫</div>
             <div class="scenario-text" id="scenText">載入中...</div>
             
             <div class="audio-control-deck">
-                <button class="audio-btn whole" onclick="playTone(currentItem.toneCode, 'full')">
+                <button class="audio-btn-whole" onclick="playTone(currentItem.toneCode)">
                     📢 聽完整句子
-                </button>
-                <button class="audio-btn" onclick="playTone(currentItem.toneCode, 'part1')">
-                    🎵 聽前半字
-                </button>
-                <button class="audio-btn" onclick="playTone(currentItem.toneCode, 'part2')">
-                    🎶 聽後半字
                 </button>
             </div>
         </div>
 
+        <!-- Choice Cards Display Frame -->
         <div class="choices-grid" id="choicesGrid"></div>
     </div>
 
+    <!-- WIN SCREEN -->
     <div id="winScreen" class="screen">
-        <h1 style="color: #0CA678;">好棒！你完成挑戰喇！ 🎉</h1>
+        <h1 style="color: #0CA678;">你真用心！你完成挑戰喇！ 🎉</h1>
         <div style="font-size: 10vh; margin: 1vh 0;">⭐⭐⭐⭐⭐</div>
         <button class="btn-prime" onclick="resetToMenu()">再玩一次</button>
     </div>
 
+    <!-- FEEDBACK OVERLAY -->
     <div id="feedbackOverlay" class="feedback-overlay">
         <div id="feedbackEmoji" style="font-size: 12vh;">👍</div>
-        <div id="feedbackMsg" class="feedback-text">啱晒喇！</div>
+        <div id="feedbackMsg" class="feedback-text">啱喇！</div>
     </div>
 
 </div>
@@ -235,8 +255,7 @@ function initAudio() {
     if (audioCtx.state === 'suspended') audioCtx.resume();
 }
 
-// Advanced Modular Tone Unit supporting full and isolated syllables parsing
-function playTone(type, segment = 'full') {
+function playTone(type) {
     if (!audioCtx) return;
     const now = audioCtx.currentTime;
     
@@ -268,35 +287,28 @@ function playTone(type, segment = 'full') {
         return;
     }
 
-    // Segment routing maps syllables arrays execution timelines
-    const playPart1 = () => { runSyllable(220, 200, 0, 0.25, false); }; // 唔
-    const playPart2 = () => { runSyllable(392, 392, 0, 0.25, false); }; // 該
-    
+    // Process structured Cantonese frequency curves natively
     if (type === 'm4goi1') {
-        if (segment === 'full' || segment === 'part1') runSyllable(220, 200, 0, 0.22, false);
-        if (segment === 'full') runSyllable(392, 392, 0.25, 0.25, false);
-        if (segment === 'part2') runSyllable(392, 392, 0, 0.25, false);
+        runSyllable(220, 200, 0, 0.22, false); runSyllable(392, 392, 0.25, 0.25, false);
     } else if (type === 'do1ze6') {
-        if (segment === 'full' || segment === 'part1') runSyllable(392, 392, 0, 0.22, false);
-        if (segment === 'full') runSyllable(220, 220, 0.25, 0.25, false);
-        if (segment === 'part2') runSyllable(220, 220, 0, 0.25, false);
+        runSyllable(392, 392, 0, 0.22, false); runSyllable(220, 220, 0.25, 0.25, false);
     } else if (type === 'ngo5jiu3') {
-        if (segment === 'full' || segment === 'part1') runSyllable(220, 293, 0, 0.22, true);
-        if (segment === 'full') runSyllable(330, 330, 0.25, 0.25, false);
-        if (segment === 'part2') runSyllable(330, 330, 0, 0.25, false);
+        runSyllable(220, 293, 0, 0.22, true);  runSyllable(330, 330, 0.25, 0.25, false);
     } else if (type === 'bong1ngo5') {
-        if (segment === 'full' || segment === 'part1') runSyllable(392, 392, 0, 0.22, false);
-        if (segment === 'full') runSyllable(220, 293, 0.25, 0.25, true);
-        if (segment === 'part2') runSyllable(220, 293, 0, 0.25, true);
+        runSyllable(392, 392, 0, 0.22, false); runSyllable(220, 293, 0.25, 0.25, true);
     } else if (type === 'bei2nei5') {
-        if (segment === 'full' || segment === 'part1') runSyllable(220, 293, 0, 0.22, true);
-        if (segment === 'full') runSyllable(220, 293, 0.25, 0.25, true);
-        if (segment === 'part2') runSyllable(220, 293, 0, 0.25, true);
+        runSyllable(220, 293, 0, 0.22, true);  runSyllable(220, 293, 0.25, 0.25, true);
     }
 }
 
 function startGame() {
     initAudio();
+    // Fix mobile Safari restriction by firing a silent instant burst to warm the channel
+    if(audioCtx) {
+        const o = audioCtx.createOscillator(); const g = audioCtx.createGain();
+        o.connect(g); g.connect(audioCtx.destination); g.gain.setValueAtTime(0.001, audioCtx.currentTime);
+        o.start(); o.stop(audioCtx.currentTime + 0.05);
+    }
     score = 0;
     gameActiveList = [...poolScenarios].sort(() => Math.random() - 0.5).slice(0, 5);
     document.getElementById('startScreen').classList.remove('active');
@@ -332,16 +344,30 @@ function nextRound() {
         card.style.backgroundColor = conf.color;
         card.style.border = `3px solid ${conf.color}`;
         
+        // Internal structured zones dividing hit regions cleanly
         card.innerHTML = `
-            <div class="choice-icon">${conf.icon}</div>
-            <div class="choice-text">${phraseString}</div>
+            <div class="choice-main-content" id="clickArea_${phraseString}">
+                <div class="choice-icon">${conf.icon}</div>
+                <div class="choice-text">${phraseString}</div>
+            </div>
+            <div class="speaker-bubble" id="speaker_${phraseString}">🔊</div>
         `;
         
-        card.onclick = () => handleChoiceSelection(phraseString);
+        // Click Routing Engine separating standard submissions from exploratory sounds queries
+        card.addEventListener('click', function(e) {
+            e.stopPropagation();
+            // Check if user specifically tapped the speaker element boundaries
+            if(e.target.id === `speaker_${phraseString}` || e.target.classList.contains('speaker-bubble')) {
+                playTone(conf.toneCode);
+            } else {
+                handleChoiceSelection(phraseString);
+            }
+        });
+
         container.appendChild(card);
     });
 
-    setTimeout(() => { playTone(currentItem.toneCode, 'full'); }, 400);
+    setTimeout(() => { playTone(currentItem.toneCode); }, 400);
 }
 
 function handleChoiceSelection(selectedPhrase) {
@@ -358,7 +384,7 @@ function handleChoiceSelection(selectedPhrase) {
         playTone('success');
     } else {
         fEmoji.innerText = "❤️";
-        fMsg.innerText = "再試多一次，聽下音聲？";
+        fMsg.innerText = "再聽多次？";
         fMsg.style.color = "#C92A2A";
         playTone('fail');
     }
@@ -368,7 +394,7 @@ function handleChoiceSelection(selectedPhrase) {
     setTimeout(() => {
         overlay.style.display = 'none';
         if (isCorrect) nextRound();
-        else playTone(currentItem.toneCode, 'full');
+        else playTone(currentItem.toneCode);
     }, 2000);
 }
 
