@@ -16,374 +16,360 @@
             height: 100vh;
             overflow: hidden;
         }
-        #gameContainer {
-            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-            border-radius: 16px;
-            overflow: hidden;
-            background: #fff;
+        
+        #gameApp {
+            width: 1024px;
+            height: 576px;
+            background: #ffffff;
+            border-radius: 24px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.12);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            box-sizing: border-box;
+            padding: 30px;
         }
-        canvas {
-            display: block;
+
+        /* Screen States */
+        .screen {
+            display: none;
+            width: 100%;
+            height: 100%;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .screen.active {
+            display: flex;
+        }
+
+        /* Typography & UI Elements */
+        h1 { color: #2B8A3E; font-size: 46px; margin-bottom: 10px; }
+        p { color: #495057; font-size: 22px; margin-bottom: 30px; text-align: center; }
+        
+        .score-bar {
+            align-self: flex-start;
+            font-size: 26px;
+            font-weight: bold;
+            color: #495057;
+            margin-bottom: 10px;
+        }
+
+        /* Top Scenario Card Container */
+        .scenario-container {
+            background: #f8f9fa;
+            border: 4px solid #dee2e6;
+            border-radius: 20px;
+            width: 85%;
+            padding: 20px;
+            text-align: center;
+            box-shadow: inset 0 2px 10px rgba(0,0,0,0.02);
+            position: relative;
+        }
+        .scenario-emoji { font-size: 65px; margin-bottom: 10px; }
+        .scenario-text { font-size: 28px; font-weight: bold; color: #212529; line-height: 1.4; }
+        
+        /* Audio Trigger Unit */
+        .audio-replay-btn {
+            background: #E3FAFC;
+            border: 3px solid #15AABF;
+            border-radius: 50px;
+            padding: 8px 24px;
+            color: #15AABF;
+            font-weight: bold;
+            font-size: 16px;
             cursor: pointer;
+            margin-top: 15px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
         }
+        .audio-replay-btn:hover { background: #C5F6FA; }
+
+        /* Bottom Choices Grid */
+        .choices-grid {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            width: 100%;
+            margin-top: 30px;
+            margin-bottom: 10px;
+        }
+        .choice-card {
+            background: #ffffff;
+            border-radius: 20px;
+            width: 250px;
+            height: 160px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-sizing: border-box;
+        }
+        .choice-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 25px rgba(0,0,0,0.12);
+        }
+        .choice-icon { font-size: 40px; margin-bottom: 8px; }
+        .choice-text { font-size: 36px; font-weight: bold; color: #ffffff; text-shadow: 0 2px 4px rgba(0,0,0,0.15); }
+
+        /* Big Green Button */
+        .btn-prime {
+            background: #10B981;
+            color: white;
+            border: none;
+            padding: 18px 45px;
+            font-size: 28px;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);
+            transition: all 0.2s;
+        }
+        .btn-prime:hover { transform: scale(1.05); background: #059669; }
+
+        /* Feedback Modal Layer */
+        .feedback-overlay {
+            display: none;
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255,255,255,0.92);
+            border-radius: 24px;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+        }
+        .feedback-text { font-size: 50px; font-weight: bold; margin-top: 20px; }
     </style>
 </head>
 <body>
 
-<div id="gameContainer">
-    <canvas id="gameCanvas" width="1024" height="576"></canvas>
+<div id="gameApp">
+    
+    <div id="startScreen" class="screen active">
+        <h1>超級說話小隊! 🚀</h1>
+        <p>睇下發生咩事，幫小朋友揀個啱嘅禮貌回應啦！</p>
+        <button class="btn-prime" onclick="startGame()">開始遊戲</button>
+    </div>
+
+    <div id="playScreen" class="screen">
+        <div class="score-bar" id="scoreDisplay">🌟 得分: 0 / 5</div>
+        
+        <div class="scenario-container">
+            <div class="scenario-emoji" id="scenEmoji">🏫</div>
+            <div class="scenario-text" id="scenText">載入中...</div>
+            <button class="audio-replay-btn" onclick="replayContextAudio()">
+                <span>👂</span> 點擊再聽一次廣東話
+            </button>
+        </div>
+
+        <div class="choices-grid" id="choicesGrid">
+            </div>
+    </div>
+
+    <div id="winScreen" class="screen">
+        <h1 style="color: #0CA678;">好棒！你完成挑戰喇！ 🎉</h1>
+        <div style="font-size: 90px; margin: 20px 0;">⭐⭐⭐⭐⭐</div>
+        <button class="btn-prime" onclick="resetToMenu()">再玩一次</button>
+    </div>
+
+    <div id="feedbackOverlay" class="feedback-overlay">
+        <div id="feedbackEmoji" style="font-size: 100px;">👍</div>
+        <div id="feedbackMsg" class="feedback-text">啱晒喇！</div>
+    </div>
+
 </div>
 
 <script>
-const canvas = document.getElementById('gameCanvas');
-const ctx = canvas.getContext('2d');
-
-// --- GAME DATA & CONFIGURATION ---
-const phrases = [
-    { id: 'm4goi1', text: '唔該', scenario: '同學遞支鉛筆比你，要講...', color: '#FF6B6B', tone: 'm4goi1' },
-    { id: 'do1ze6', text: '多謝', scenario: '朋友送份貼紙禮物比你，要講...', color: '#4DABF7', tone: 'do1ze6' },
-    { id: 'ngo5jiu3', text: '我要', scenario: '食茶點想要蘋果，同老師講...', color: '#51CF66', tone: 'ngo5jiu3' },
-    { id: 'bong1ngo5', text: '幫我', scenario: '拉唔到外套拉鏈，同老師講...', color: '#FCC419', tone: 'bong1ngo5' },
-    { id: 'bei2nei5', text: '比你', scenario: '將架玩具車分享比朋友，要講...', color: '#B197FC', tone: 'bei2nei5' }
+// --- GAME SCENARIOS DATABASE (10 Items, 2 per phrase) ---
+const poolScenarios = [
+    { phrase: '唔該', emoji: '✏️', text: '同學遞支鉛筆比你，你要同佢講...', tone: 'm4goi1' },
+    { phrase: '唔該', emoji: '🧃', text: '老師幫你遞個包裝紙包飲品，你要講...', tone: 'm4goi1' },
+    
+    { phrase: '多謝', emoji: '🎁', text: '朋友送咗一份好靚嘅貼紙禮物比你，你要講...', tone: 'do1ze6' },
+    { phrase: '多謝', emoji: '🍬', text: '校長送一粒糖果獎勵你，你要同校長講...', tone: 'do1ze6' },
+    
+    { phrase: '我要', emoji: '🍎', text: '食茶點嘅時候你想要大蘋果，你要同老師講...', tone: 'ngo5jiu3' },
+    { phrase: '我要', emoji: '🎨', text: '美勞堂你想拿藍色嘅畫筆，你要指住講...', tone: 'ngo5jiu3' },
+    
+    { phrase: '幫我', emoji: '🧥', text: '你拉唔到外套嘅拉鏈，你要向老師講...', tone: 'bong1ngo5' },
+    { phrase: '幫我', emoji: '🍼', text: '水樽蓋扭得太緊打開唔到，你要搵大人講...', tone: 'bong1ngo5' },
+    
+    { phrase: '比你', emoji: '🚗', text: '你想將自己架玩具車分享比小隊友玩，你要講...', tone: 'bei2nei5' },
+    { phrase: '比你', emoji: '📄', text: '你畫好功課畫冊，雙手交比老師嘅時候要講...', tone: 'bei2nei5' }
 ];
 
-let gameState = 'START'; 
-let currentTarget = null;
-let options = [];
-let feedbackMessage = '';
-let feedbackColor = '#000';
-let score = 0;
-const targetScore = 5;
+const phraseConfig = {
+    '唔該': { color: '#FF6B6B', icon: '🙏', toneCode: 'm4goi1' },
+    '多謝': { color: '#4DABF7', icon: '❤️', toneCode: 'do1ze6' },
+    '我要': { color: '#51CF66', icon: '🙋', toneCode: 'ngo5jiu3' },
+    '幫我': { color: '#FCC419', icon: '🤝', toneCode: 'bong1ngo5' },
+    '比你': { color: '#B197FC', icon: '🤲', toneCode: 'bei2nei5' }
+};
 
+let gameActiveList = [];
+let currentItem = null;
+let score = 0;
 let audioCtx = null;
 
-function drawRoundedRect(x, y, width, height, radius, fill, stroke, strokeColor) {
-    ctx.beginPath();
-    ctx.moveTo(x + radius, y);
-    ctx.lineTo(x + width - radius, y);
-    ctx.arcTo(x + width, y, x + width, y + height, radius);
-    ctx.lineTo(x + width, y + height - radius);
-    ctx.arcTo(x + width, y + height, x + width - radius, y + height, radius);
-    ctx.lineTo(x + radius, y + height);
-    ctx.arcTo(x, y + height, x, y + height - radius, radius);
-    ctx.lineTo(x, y + radius);
-    ctx.arcTo(x, y, x + radius, y, radius);
-    ctx.closePath();
-    if (fill) ctx.fill();
-    if (stroke) {
-        ctx.strokeStyle = strokeColor || '#000';
-        ctx.stroke();
-    }
-}
-
 function initAudio() {
-    if (!audioCtx) {
-        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    }
-    if (audioCtx.state === 'suspended') {
-        audioCtx.resume();
-    }
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if (audioCtx.state === 'suspended') audioCtx.resume();
 }
 
-// Synthesizer with strict acoustic mapping for Cantonese tones
-function playToneSequence(type) {
+// Custom Speech Soundwave Matrix
+function playTone(type) {
     if (!audioCtx) return;
     const now = audioCtx.currentTime;
-    
     const osc1 = audioCtx.createOscillator();
-    const gain1 = audioCtx.createGain();
-    osc1.connect(gain1);
-    gain1.connect(audioCtx.destination);
-    
     const osc2 = audioCtx.createOscillator();
+    const gain1 = audioCtx.createGain();
     const gain2 = audioCtx.createGain();
-    osc2.connect(gain2);
-    gain2.connect(audioCtx.destination);
+    
+    osc1.connect(gain1); gain1.connect(audioCtx.destination);
+    osc2.connect(gain2); gain2.connect(audioCtx.destination);
+    osc1.type = 'triangle'; osc2.type = 'sine';
 
-    osc1.type = 'triangle';
-    osc2.type = 'sine';
-
-    if (type === 'm4goi1') { 
-        // 唔該: low falling (220 -> 200) then clear high flat (392)
-        osc1.frequency.setValueAtTime(220, now);
-        osc1.frequency.linearRampToValueAtTime(200, now + 0.2);
-        osc1.frequency.setValueAtTime(392, now + 0.25);
-        osc1.frequency.setValueAtTime(392, now + 0.5);
-
-        osc2.frequency.setValueAtTime(440, now);
-        osc2.frequency.linearRampToValueAtTime(400, now + 0.2);
-        osc2.frequency.setValueAtTime(784, now + 0.25);
-        osc2.frequency.setValueAtTime(784, now + 0.5);
-    } 
-    else if (type === 'do1ze6') { 
-        // 多謝: high flat (392) then low flat (220)
-        osc1.frequency.setValueAtTime(392, now);
-        osc1.frequency.setValueAtTime(392, now + 0.2);
-        osc1.frequency.setValueAtTime(220, now + 0.25);
-        osc1.frequency.setValueAtTime(220, now + 0.5);
-
-        osc2.frequency.setValueAtTime(784, now);
-        osc2.frequency.setValueAtTime(784, now + 0.2);
-        osc2.frequency.setValueAtTime(440, now + 0.25);
-        osc2.frequency.setValueAtTime(440, now + 0.5);
-    } 
-    else if (type === 'ngo5jiu3') { 
-        // 我要: low rising (220 -> 293) then mid flat (330)
-        osc1.frequency.setValueAtTime(220, now);
-        osc1.frequency.exponentialRampToValueAtTime(293, now + 0.2);
+    if (type === 'm4goi1') {
+        osc1.frequency.setValueAtTime(220, now); osc1.frequency.linearRampToValueAtTime(200, now + 0.18);
+        osc1.frequency.setValueAtTime(392, now + 0.22);
+        osc2.frequency.setValueAtTime(440, now); osc2.frequency.linearRampToValueAtTime(400, now + 0.18);
+        osc2.frequency.setValueAtTime(784, now + 0.22);
+    } else if (type === 'do1ze6') {
+        osc1.frequency.setValueAtTime(392, now); osc1.frequency.setValueAtTime(220, now + 0.25);
+        osc2.frequency.setValueAtTime(784, now); osc2.frequency.setValueAtTime(440, now + 0.25);
+    } else if (type === 'ngo5jiu3') {
+        osc1.frequency.setValueAtTime(220, now); osc1.frequency.exponentialRampToValueAtTime(293, now + 0.2);
         osc1.frequency.setValueAtTime(330, now + 0.25);
-        osc1.frequency.setValueAtTime(330, now + 0.5);
-
-        osc2.frequency.setValueAtTime(440, now);
-        osc2.frequency.exponentialRampToValueAtTime(586, now + 0.2);
+        osc2.frequency.setValueAtTime(440, now); osc2.frequency.exponentialRampToValueAtTime(586, now + 0.2);
         osc2.frequency.setValueAtTime(660, now + 0.25);
-        osc2.frequency.setValueAtTime(660, now + 0.5);
-    } 
-    else if (type === 'bong1ngo5') { 
-        // 幫我: high flat (392) then low rising (220 -> 293)
-        osc1.frequency.setValueAtTime(392, now);
-        osc1.frequency.setValueAtTime(392, now + 0.2);
-        osc1.frequency.setValueAtTime(220, now + 0.25);
-        osc1.frequency.exponentialRampToValueAtTime(293, now + 0.5);
-
-        osc2.frequency.setValueAtTime(784, now);
-        osc2.frequency.setValueAtTime(784, now + 0.2);
-        osc2.frequency.setValueAtTime(440, now + 0.25);
-        osc2.frequency.exponentialRampToValueAtTime(586, now + 0.5);
-    } 
-    else if (type === 'bei2nei5') { 
-        // 比你: low rising (220 -> 293) then low rising (220 -> 293)
-        osc1.frequency.setValueAtTime(220, now);
-        osc1.frequency.exponentialRampToValueAtTime(293, now + 0.2);
-        osc1.frequency.setValueAtTime(220, now + 0.25);
-        osc1.frequency.exponentialRampToValueAtTime(293, now + 0.5);
-
-        osc2.frequency.setValueAtTime(440, now);
-        osc2.frequency.exponentialRampToValueAtTime(586, now + 0.2);
-        osc2.frequency.setValueAtTime(440, now + 0.25);
-        osc2.frequency.exponentialRampToValueAtTime(586, now + 0.5);
-    } 
-    else if (type === 'success') { 
-        osc1.type = 'sine';
-        osc1.frequency.setValueAtTime(523.25, now); // C5
-        osc1.frequency.setValueAtTime(659.25, now + 0.1); // E5
-        osc1.frequency.setValueAtTime(783.99, now + 0.2); // G5
-    } 
-    else if (type === 'fail') { 
-        osc1.type = 'sawtooth';
-        osc1.frequency.setValueAtTime(150, now);
-        osc1.frequency.linearRampToValueAtTime(100, now + 0.3);
+    } else if (type === 'bong1ngo5') {
+        osc1.frequency.setValueAtTime(392, now); osc1.frequency.setValueAtTime(220, now + 0.22);
+        osc1.frequency.exponentialRampToValueAtTime(293, now + 0.45);
+        osc2.frequency.setValueAtTime(784, now); osc2.frequency.setValueAtTime(440, now + 0.22);
+        osc2.frequency.exponentialRampToValueAtTime(586, now + 0.45);
+    } else if (type === 'bei2nei5') {
+        osc1.frequency.setValueAtTime(220, now); osc1.frequency.exponentialRampToValueAtTime(293, now + 0.2);
+        osc1.frequency.setValueAtTime(220, now + 0.25); osc1.frequency.exponentialRampToValueAtTime(293, now + 0.45);
+        osc2.frequency.setValueAtTime(440, now); osc2.frequency.exponentialRampToValueAtTime(586, now + 0.2);
+        osc2.frequency.setValueAtTime(440, now + 0.25); osc2.frequency.exponentialRampToValueAtTime(586, now + 0.45);
+    } else if (type === 'success') {
+        osc1.type = 'sine'; osc1.frequency.setValueAtTime(523.25, now); osc1.frequency.setValueAtTime(659.25, now + 0.1); osc1.frequency.setValueAtTime(783.99, now + 0.2);
+    } else if (type === 'fail') {
+        osc1.type = 'sawtooth'; osc1.frequency.setValueAtTime(150, now); osc1.frequency.linearRampToValueAtTime(100, now + 0.25);
     }
 
-    // Envelope configs
-    const duration = (type === 'success' || type === 'fail') ? 0.3 : 0.6;
-    gain1.gain.setValueAtTime(0.2, now);
-    gain1.gain.exponentialRampToValueAtTime(0.01, now + duration);
-    gain2.gain.setValueAtTime(0.1, now);
-    gain2.gain.exponentialRampToValueAtTime(0.01, now + duration);
-
-    osc1.start(now);
-    osc1.stop(now + duration + 0.05);
-    osc2.start(now);
-    osc2.stop(now + duration + 0.05);
+    const duration = (type==='success'||type==='fail') ? 0.25 : 0.55;
+    gain1.gain.setValueAtTime(0.15, now); gain1.gain.exponentialRampToValueAtTime(0.01, now + duration);
+    gain2.gain.setValueAtTime(0.08, now); gain2.gain.exponentialRampToValueAtTime(0.01, now + duration);
+    osc1.start(now); osc1.stop(now + duration + 0.02);
+    osc2.start(now); osc2.stop(now + duration + 0.02);
 }
 
-function initRound() {
-    if (score >= targetScore) {
-        gameState = 'WIN';
+function switchScreen(screenId) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(screenId).classList.add('active');
+}
+
+function startGame() {
+    initAudio();
+    score = 0;
+    // Extract 5 completely random scenarios out of the 10 scenarios total
+    gameActiveList = [...poolScenarios].sort(() => Math.random() - 0.5).slice(0, 5);
+    switchScreen('playScreen');
+    nextRound();
+}
+
+function replayContextAudio() {
+    if (currentItem) playTone(currentItem.toneCode);
+}
+
+function nextRound() {
+    if (gameActiveList.length === 0) {
+        switchScreen('winScreen');
         return;
     }
+
+    document.getElementById('scoreDisplay').innerText = `🌟 得分: ${score} / 5`;
+    currentItem = gameActiveList.pop();
     
-    currentTarget = phrases[Math.floor(Math.random() * phrases.length)];
-    let pool = [...phrases].filter(p => p.id !== currentTarget.id);
-    options = [currentTarget];
+    // Set text safely inside HTML layout bounds
+    document.getElementById('scenEmoji').innerText = currentItem.emoji;
+    document.getElementById('scenText').innerText = currentItem.text;
+
+    // Build Choice Setup: Correct Answer + 2 Random Distractors
+    const correctPhrase = currentItem.phrase;
+    const distinctPhrases = Object.keys(phraseConfig).filter(p => p !== correctPhrase);
+    const shuffledDistractors = distinctPhrases.sort(() => Math.random() - 0.5).slice(0, 2);
     
-    while(options.length < 3) {
-        let index = Math.floor(Math.random() * pool.length);
-        options.push(pool[index]);
-        pool.splice(index, 1);
+    const operationalChoices = [correctPhrase, ...shuffledDistractors].sort(() => Math.random() - 0.5);
+    
+    // Inject components natively using safe flex items
+    const container = document.getElementById('choicesGrid');
+    container.innerHTML = '';
+    
+    operationalChoices.forEach(phraseString => {
+        const conf = phraseConfig[phraseString];
+        const card = document.createElement('div');
+        card.className = 'choice-card';
+        card.style.backgroundColor = conf.color;
+        card.style.border = `4px solid ${conf.color}`;
+        
+        card.innerHTML = `
+            <div class="choice-icon">${conf.icon}</div>
+            <div class="choice-text">${phraseString}</div>
+        `;
+        
+        card.onclick = () => handleChoiceSelection(phraseString);
+        container.appendChild(card);
+    });
+
+    // Fire sound effect right at structural init sequence
+    setTimeout(() => { playTone(currentItem.toneCode); }, 300);
+}
+
+function handleChoiceSelection(selectedPhrase) {
+    const isCorrect = (selectedPhrase === currentItem.phrase);
+    const overlay = document.getElementById('feedbackOverlay');
+    const fEmoji = document.getElementById('feedbackEmoji');
+    const fMsg = document.getElementById('feedbackMsg');
+
+    if (isCorrect) {
+        score++;
+        fEmoji.innerText = "👍";
+        fMsg.innerText = "答對了！啱晒喇！";
+        fMsg.style.color = "#2B8A3E";
+        playTone('success');
+    } else {
+        fEmoji.innerText = "❤️";
+        fMsg.innerText = "再試多一次，聽下音聲？";
+        fMsg.style.color = "#C92A2A";
+        playTone('fail');
     }
-    
-    options.sort(() => Math.random() - 0.5);
-    gameState = 'PLAYING';
-    
-    setTimeout(() => { playToneSequence(currentTarget.tone); }, 400);
-}
 
-const audioButton = { x: 452, y: 120, w: 120, h: 120 };
-const cards = [
-    { x: 80, y: 320, w: 260, h: 200 },
-    { x: 382, y: 320, w: 260, h: 200 },
-    { x: 684, y: 320, w: 260, h: 200 }
-];
-
-function drawStartScreen() {
-    ctx.fillStyle = '#f0f8ff';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    overlay.style.display = 'flex';
     
-    ctx.fillStyle = '#2B8A3E';
-    ctx.font = 'bold 50px "PingFang HK", Arial';
-    ctx.textAlign = 'center';
-    ctx.fillText('超級說話小隊 🚀', 512, 190);
-    
-    ctx.fillStyle = '#495057';
-    ctx.font = '24px "PingFang HK", Arial';
-    ctx.fillText('聽廣東話語音，搵出岩對應嘅生活場景！', 512, 260);
-    
-    ctx.fillStyle = '#10B981';
-    drawRoundedRect(412, 360, 200, 70, 20, true, false);
-    
-    ctx.fillStyle = '#FFF';
-    ctx.font = 'bold 28px "PingFang HK", Arial';
-    ctx.fillText('開始遊戲', 512, 405);
-}
-
-function drawPlayingScreen() {
-    ctx.fillStyle = '#FFF';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    
-    ctx.fillStyle = '#495057';
-    ctx.font = 'bold 24px "PingFang HK", Arial';
-    ctx.textAlign = 'left';
-    ctx.fillText(`🌟 得分: ${score} / ${targetScore}`, 40, 50);
-    
-    ctx.fillStyle = '#E3FAFC';
-    ctx.lineWidth = 4;
-    drawRoundedRect(audioButton.x, audioButton.y, audioButton.w, audioButton.h, 25, true, true, '#15AABF');
-    
-    ctx.fillStyle = '#15AABF';
-    ctx.font = 'bold 55px Arial';
-    ctx.textAlign = 'center';
-    ctx.fillText('👂', 512, 195);
-    ctx.font = 'bold 16px "PingFang HK", Arial';
-    ctx.fillText('點擊聽廣東話', 512, 225);
-
-    for (let i = 0; i < options.length; i++) {
-        let card = cards[i];
-        let opt = options[i];
-        
-        ctx.fillStyle = '#FFF';
-        ctx.shadowColor = 'rgba(0,0,0,0.08)';
-        ctx.shadowBlur = 15;
-        ctx.shadowOffsetY = 6;
-        
-        drawRoundedRect(card.x, card.y, card.w, card.h, 16, true, false);
-        ctx.shadowColor = 'transparent';
-        
-        ctx.lineWidth = 3;
-        ctx.strokeStyle = opt.color;
-        drawRoundedRect(card.x, card.y, card.w, card.h, 16, false, true, opt.color);
-        
-        ctx.fillStyle = opt.color;
-        ctx.font = '60px Arial';
-        ctx.fillText('🏫', card.x + card.w/2, card.y + 80);
-        
-        ctx.fillStyle = '#212529';
-        ctx.font = 'bold 20px "PingFang HK", Arial';
-        wrapText(ctx, opt.scenario, card.x + 20, card.y + 130, card.w - 40, 28);
-    }
-}
-
-function drawFeedbackScreen() {
-    drawPlayingScreen();
-    ctx.fillStyle = 'rgba(255,255,255,0.9)';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    
-    ctx.fillStyle = feedbackColor;
-    ctx.font = 'bold 48px "PingFang HK", Arial';
-    ctx.textAlign = 'center';
-    ctx.fillText(feedbackMessage, 512, 280);
-}
-
-function drawWinScreen() {
-    ctx.fillStyle = '#E6FCF5';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    
-    ctx.fillStyle = '#0CA678';
-    ctx.font = 'bold 55px "PingFang HK", Arial';
-    ctx.textAlign = 'center';
-    ctx.fillText('好棒！你完成挑戰喇！ 🎉', 512, 230);
-    
-    ctx.fillStyle = '#63E6BE';
-    ctx.font = '100px Arial';
-    ctx.fillText('⭐⭐⭐⭐延', 512, 350);
-    
-    ctx.fillStyle = '#212529';
-    ctx.font = '22px "PingFang HK", Arial';
-    ctx.fillText('點擊任何地方重新玩過！', 512, 450);
-}
-
-function wrapText(context, text, x, y, maxWidth, lineHeight) {
-    // Character-by-character split for clean traditional Chinese wrapping rules
-    let chars = text.split('');
-    let line = '';
-    for(let n = 0; n < chars.length; n++) {
-        let testLine = line + chars[n];
-        let testWidth = context.measureText(testLine).width;
-        if (testWidth > maxWidth && n > 0) {
-            context.fillText(line, x + maxWidth/2 - context.measureText(line).width/2, y);
-            line = chars[n];
-            y += lineHeight;
+    setTimeout(() => {
+        overlay.style.display = 'none';
+        if (isCorrect) {
+            nextRound();
         } else {
-            line = testLine;
+            // Replay the target phrase tone helper on error parameters
+            playTone(currentItem.toneCode);
         }
-    }
-    context.fillText(line, x + maxWidth/2 - context.measureText(line).width/2, y);
+    }, 2000);
 }
 
-canvas.addEventListener('click', function(e) {
-    const rect = canvas.getBoundingClientRect();
-    const mx = e.clientX - rect.left;
-    const my = e.clientY - rect.top;
-    
-    initAudio();
-
-    if (gameState === 'START') {
-        if (mx >= 412 && mx <= 612 && my >= 360 && my <= 430) {
-            score = 0;
-            initRound();
-        }
-    } 
-    else if (gameState === 'PLAYING') {
-        if (mx >= audioButton.x && mx <= audioButton.x + audioButton.w &&
-            my >= audioButton.y && my <= audioButton.y + audioButton.h) {
-            playToneSequence(currentTarget.tone);
-            return;
-        }
-        
-        for (let i = 0; i < cards.length; i++) {
-            let card = cards[i];
-            if (mx >= card.x && mx <= card.x + card.w && my >= card.y && my <= card.y + card.h) {
-                if (options[i].id === currentTarget.id) {
-                    score++;
-                    feedbackMessage = "答對了！👍 啱晒喇！";
-                    feedbackColor = "#2B8A3E";
-                    playToneSequence('success');
-                } else {
-                    feedbackMessage = "試多一次，再聽下？";
-                    feedbackColor = "#C92A2A";
-                    playToneSequence('fail');
-                }
-                gameState = 'FEEDBACK';
-                setTimeout(() => { initRound(); }, 1800);
-            }
-        }
-    } 
-    else if (gameState === 'WIN') {
-        gameState = 'START';
-    }
-});
-
-function gameLoop() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    if (gameState === 'START') drawStartScreen();
-    else if (gameState === 'PLAYING') drawPlayingScreen();
-    else if (gameState === 'FEEDBACK') drawFeedbackScreen();
-    else if (gameState === 'WIN') drawWinScreen();
-    requestAnimationFrame(gameLoop);
+function resetToMenu() {
+    switchScreen('startScreen');
 }
-
-gameLoop();
 </script>
 
 </body>
