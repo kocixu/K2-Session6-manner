@@ -10,74 +10,156 @@
             background-color: #f0f8ff;
             font-family: 'Helvetica Neue', 'PingFang HK', 'Microsoft JhengHei', Arial, sans-serif;
             display: flex; justify-content: center; align-items: center;
-            min-height: 100vh; overflow: hidden; touch-action: manipulation;
+            min-height: 100vh; touch-action: manipulation;
         }
+        
+        /* Fully Fluid Layout Container */
         #gameApp {
-            width: 100%; max-width: 960px; aspect-ratio: 16 / 9;
-            background: #ffffff; border-radius: 20px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
-            position: relative; display: flex; flex-direction: column;
-            align-items: center; justify-content: space-between;
-            box-sizing: border-box; padding: 2vh 4vw;
+            width: 100vw;
+            height: 100vh;
+            max-width: 960px;
+            max-height: 600px;
+            background: #ffffff;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            box-sizing: border-box;
+            padding: 15px;
         }
-        @media (max-aspect-ratio: 16/9) {
-            #gameApp { width: 95vw; height: calc(95vw * 9 / 16); }
+
+        /* Desktop & Large Tablet Enhancements */
+        @media (min-width: 768px) and (min-height: 600px) {
+            #gameApp {
+                height: auto;
+                aspect-ratio: 16 / 9;
+                border-radius: 20px;
+                box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+                padding: 25px;
+            }
         }
+
         .screen { display: none; width: 100%; height: 100%; flex-direction: column; align-items: center; justify-content: center; }
         .screen.active { display: flex; }
-        h1 { color: #2B8A3E; font-size: 4.5vh; margin: 0 0 1vh 0; }
-        p { color: #495057; font-size: 2.5vh; margin: 0 0 2vh 0; text-align: center; }
-        .score-bar { align-self: flex-start; font-size: 2.6vh; font-weight: bold; color: #495057; margin-bottom: 0.5vh; }
         
-        /* Interactive Graphic Frame with Text Fallback Support */
+        h1 { color: #2B8A3E; font-size: 1.8rem; margin: 0 0 10px 0; text-align: center; }
+        p { color: #495057; font-size: 1.1rem; margin: 0 0 20px 0; text-align: center; }
+        
+        /* Fixed Progress Bar Header */
+        .score-bar { 
+            width: 100%;
+            font-size: 1.2rem; 
+            font-weight: bold; 
+            color: #495057; 
+            text-align: left;
+            margin-bottom: 5px;
+            flex-shrink: 0;
+        }
+        
+        /* Auto-scaling Picture Frame */
         .scenario-graphic-card {
-            background: #f8f9fa; border: 4px solid #0EA5E9; border-radius: 20px;
-            width: 85%; height: 38vh; display: flex; flex-direction: column; 
-            justify-content: center; align-items: center;
-            overflow: hidden; position: relative; box-shadow: 0 8px 20px rgba(0,0,0,0.06);
-            box-sizing: border-box; padding: 2vh;
+            background: #f8f9fa; 
+            border: 4px solid #0EA5E9; 
+            border-radius: 20px;
+            width: 100%; 
+            flex-grow: 1;
+            min-height: 140px;
+            max-height: 40vh;
+            display: flex; 
+            flex-direction: column; 
+            justify-content: center; 
+            align-items: center;
+            overflow: hidden; 
+            position: relative; 
+            box-shadow: 0 6px 15px rgba(0,0,0,0.05);
+            box-sizing: border-box;
         }
         .scenario-img {
             width: 100%; height: 100%; object-fit: contain; position: absolute; top:0; left:0; z-index: 2;
         }
         .fallback-box {
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            z-index: 1; text-align: center;
+            z-index: 1; text-align: center; padding: 10px;
         }
-        .fallback-emoji { font-size: 7vh; margin-bottom: 1vh; }
-        .fallback-text { font-size: 2.8vh; font-weight: bold; color: #212529; line-height: 1.3; }
+        .fallback-emoji { font-size: 3rem; margin-bottom: 5px; }
+        .fallback-text { font-size: 1.1rem; font-weight: bold; color: #212529; line-height: 1.3; }
         
-        .audio-control-deck { margin-top: 1vh; z-index: 5; }
+        /* Audio Button Row */
+        .audio-control-deck { margin: 8px 0; flex-shrink: 0; }
         .audio-btn-whole {
             background: #E6FFFA; border: 2px solid #0EA5E9; border-radius: 12px;
-            padding: 0.8vh 2.5vw; color: #0EA5E9; font-weight: bold; font-size: 2.2vh;
-            cursor: pointer; display: flex; align-items: center; gap: 0.5vw;
+            padding: 8px 20px; color: #0EA5E9; font-weight: bold; font-size: 1rem;
+            cursor: pointer; display: flex; align-items: center; gap: 8px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.05);
         }
-        .choices-grid { display: flex; justify-content: center; gap: 3vw; width: 100%; margin-top: 1vh; z-index: 5; }
-        .choice-wrapper { flex: 1; max-width: 240px; display: flex; flex-direction: column; align-items: center; gap: 1vh; }
-        .choice-card {
-            border-radius: 16px; width: 100%; height: 15vh;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            cursor: pointer; box-shadow: 0 6px 15px rgba(0,0,0,0.06); box-sizing: border-box;
+        
+        /* Wrap Choices Fluidly Based on Orientation */
+        .choices-grid { 
+            display: flex; 
+            justify-content: center; 
+            gap: 12px; 
+            width: 100%; 
+            flex-shrink: 0;
         }
-        .choice-icon { font-size: 4vh; margin-bottom: 0.2vh; }
-        .choice-text { font-size: 3.5vh; font-weight: bold; color: #ffffff; text-shadow: 0 2px 4px rgba(0,0,0,0.15); }
+        .choice-wrapper { 
+            flex: 1; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            gap: 6px; 
+        }
+        .choice-card {
+            border-radius: 16px; width: 100%; height: 65px;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.06); box-sizing: border-box;
+        }
+        .choice-icon { font-size: 1.5rem; }
+        .choice-text { font-size: 1.3rem; font-weight: bold; color: #ffffff; text-shadow: 0 1px 3px rgba(0,0,0,0.15); }
         .speaker-bubble-outside {
             background: #f1f3f5; border: 2px solid #ced4da; border-radius: 50%;
-            width: 5vh; height: 5vh; display: flex; align-items: center; justify-content: center;
-            font-size: 2.5vh; color: #495057; cursor: pointer; box-shadow: 0 3px 6px rgba(0,0,0,0.08);
+            width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;
+            font-size: 1.1rem; color: #495057; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.08);
         }
+        
         .btn-prime {
-            background: #10B981; color: white; border: none; padding: 2vh 5vw;
-            font-size: 3vh; font-weight: bold; border-radius: 50px; cursor: pointer;
+            background: #10B981; color: white; border: none; padding: 12px 40px;
+            font-size: 1.3rem; font-weight: bold; border-radius: 50px; cursor: pointer;
         }
         .feedback-overlay {
             display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(255,255,255,0.94); border-radius: 20px;
+            background: rgba(255,255,255,0.95); border-radius: 20px;
             flex-direction: column; align-items: center; justify-content: center; z-index: 10;
         }
-        .feedback-text { font-size: 4.5vh; font-weight: bold; margin-top: 2vh; }
+        .feedback-text { font-size: 2rem; font-weight: bold; margin-top: 15px; }
+
+        /* 📱 VERTICAL PORTRAIT OPTIMIZATION */
+        @media (max-width: 480px) and (orientation: portrait) {
+            h1 { font-size: 1.6rem; }
+            .scenario-graphic-card { max-height: 45vh; }
+            .choice-card { height: 75px; }
+            .choice-text { font-size: 1.4rem; }
+            .choice-icon { font-size: 1.7rem; }
+        }
+
+        /* 📱 HORIZONTAL LANDSCAPE OPTIMIZATION */
+        @media (max-height: 450px) and (orientation: landscape) {
+            #gameApp { padding: 6px 12px; }
+            h1 { font-size: 1.3rem; margin-bottom: 2px; }
+            p { font-size: 0.9rem; margin-bottom: 8px; }
+            .score-bar { font-size: 1rem; margin-bottom: 2px; }
+            .scenario-graphic-card { max-height: 38vh; border-width: 3px; border-radius: 12px; }
+            .fallback-emoji { font-size: 2rem; margin-bottom: 2px; }
+            .fallback-text { font-size: 0.95rem; }
+            .audio-control-deck { margin: 4px 0; }
+            .audio-btn-whole { padding: 4px 12px; font-size: 0.85rem; border-radius: 8px; }
+            .choices-grid { gap: 8px; }
+            .choice-card { height: 48px; border-radius: 12px; }
+            .choice-text { font-size: 1.1rem; }
+            .choice-icon { font-size: 1.2rem; }
+            .speaker-bubble-outside { width: 28px; height: 28px; font-size: 0.9rem; }
+            .feedback-text { font-size: 1.5rem; }
+        }
     </style>
 </head>
 <body>
@@ -92,14 +174,11 @@
     <div id="playScreen" class="screen">
         <div class="score-bar" id="scoreDisplay">🌟 得分: 0 / 5</div>
         
-        <!-- Multi-layered graphic display frame -->
         <div class="scenario-graphic-card">
-            <!-- Text fallback layer (Visible only if the image fails) -->
             <div class="fallback-box">
                 <div class="fallback-emoji" id="scenEmoji">✏️</div>
                 <div class="fallback-text" id="scenText">載入中...</div>
             </div>
-            <!-- Main image layer -->
             <img src="" id="scenImage" class="scenario-img" alt="Scenario Graphic" onerror="handleImageError()" onload="handleImageSuccess()">
         </div>
         
@@ -111,12 +190,12 @@
 
     <div id="winScreen" class="screen">
         <h1 style="color: #0CA678;">你好比心機呀！你完成挑戰喇！ 🎉</h1>
-        <div style="font-size: 10vh; margin: 1vh 0;">⭐⭐⭐⭐⭐</div>
+        <div style="font-size: 4rem; margin: 5px 0;">⭐⭐⭐⭐⭐</div>
         <button class="btn-prime" onclick="resetToMenu()">再玩一次</button>
     </div>
 
     <div id="feedbackOverlay" class="feedback-overlay">
-        <div id="feedbackEmoji" style="font-size: 12vh;">👍</div>
+        <div id="feedbackEmoji" style="font-size: 5rem;">👍</div>
         <div id="feedbackMsg" class="feedback-text">啱喇！</div>
     </div>
 </div>
@@ -132,7 +211,7 @@ const poolScenarios = [
     { phrase: '我要', emoji: '🍎', text: '食茶點嘅時候你想要大蘋果，你要同老師講...', imgFile: 'scen_apple.png', audioFile: 'scen_ngo5jiu3_1.mp3' },
     { phrase: '我要', emoji: '🎨', text: '美勞堂你想要藍色嘅畫筆，你要指住講...', imgFile: 'scen_brush.png', audioFile: 'scen_ngo5jiu3_2.mp3' },
     { phrase: '幫我', emoji: '🧥', text: '你拉唔到外套嘅拉鏈，你要向老師講...', imgFile: 'scen_zipper.png', audioFile: 'scen_bong1ngo5_1.mp3' },
-    { phrase: '幫我', emoji: '🫙', text: '水樽扭得太緊，所以你開唔到，你要搵大人講...', imgFile: 'scen_jar.png', audioFile: 'scen_bong1ngo5_2.mp3' },
+    { phrase: '幫我', emoji: '🫙', text: '糖果罐扭得太緊，所以你開唔到，你要搵大人講...', imgFile: 'scen_jar.png', audioFile: 'scen_bong1ngo5_2.mp3' },
     { phrase: '比你', emoji: '🚗', text: '你想將自己架玩具車分享比小隊友玩，你要講...', imgFile: 'scen_car.png', audioFile: 'scen_bei2nei5_1.mp3' },
     { phrase: '比你', emoji: '📄', text: '你做好功課，交比老師嘅時候要講......', imgFile: 'scen_homework.png', audioFile: 'scen_bei2nei5_2.mp3' }
 ];
@@ -151,12 +230,10 @@ let score = 0;
 let activeAudio = null;
 
 function handleImageError() {
-    // Hide broken image placeholder completely, show crisp text layout fallback
     document.getElementById('scenImage').style.display = 'none';
 }
 
 function handleImageSuccess() {
-    // Bring image to front if successfully loaded from assets folder
     document.getElementById('scenImage').style.display = 'block';
 }
 
@@ -167,7 +244,7 @@ function playAudioFile(fileName) {
             activeAudio.currentTime = 0; 
         }
         activeAudio = new Audio(AUDIO_FOLDER + fileName);
-        activeAudio.play().catch(e => console.log("Audio block handled"));
+        activeAudio.play().catch(e => console.log("Audio skipped"));
     } catch (err) {
         console.log("Audio fallback handled");
     }
@@ -190,11 +267,9 @@ function nextRound() {
     document.getElementById('scoreDisplay').innerText = `🌟 得分: ${score} / 5`;
     currentItem = gameActiveList.pop();
     
-    // Core fallback data settings
     document.getElementById('scenEmoji').innerText = currentItem.emoji;
     document.getElementById('scenText').innerText = currentItem.text;
     
-    // Set source execution target path
     const imgElement = document.getElementById('scenImage');
     imgElement.style.display = 'none'; 
     imgElement.src = AUDIO_FOLDER + currentItem.imgFile;
@@ -242,7 +317,7 @@ function handleChoiceSelection(selectedPhrase) {
         score++; fEmoji.innerText = "👍"; fMsg.innerText = "啱喇！";
         fMsg.style.color = "#2B8A3E"; playAudioFile('success.mp3');
     } else {
-        fEmoji.innerText = "❤️"; fMsg.innerText = "再聽多一次？";
+        fEmoji.innerText = "❤️"; fMsg.innerText = "再聽多次？";
         fMsg.style.color = "#C92A2A"; playAudioFile('fail.mp3');
     }
 
