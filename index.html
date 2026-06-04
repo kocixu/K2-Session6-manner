@@ -54,15 +54,15 @@
             flex-shrink: 0;
         }
         
-        /* Interactive Graphic Frame with Sync Visibility Controls */
+        /* Main Interactive Graphic Frame Container */
         .scenario-graphic-card {
             background: #f8f9fa; 
             border: 4px solid #0EA5E9; 
             border-radius: 20px;
             width: 100%; 
             flex-grow: 1;
-            min-height: 140px;
-            max-height: 40vh;
+            min-height: 160px;
+            max-height: 42vh;
             display: flex; 
             flex-direction: column; 
             justify-content: center; 
@@ -74,33 +74,53 @@
             padding: 10px;
         }
 
-        /* This wrapper ensures the image and its text fallback stay synced */
+        /* Synced content wrapper uses a clean vertical stacked layout */
         .sync-content-wrapper {
             width: 100%;
             height: 100%;
             display: flex;
             flex-direction: column;
-            justify-content: center;
+            justify-content: space-between;
             align-items: center;
-            opacity: 0; /* Hidden by default until loaded */
+            opacity: 0; 
             transition: opacity 0.2s ease-in-out;
+            box-sizing: border-box;
         }
 
-        /* When ready, this class is added to reveal everything instantly together */
         .sync-content-wrapper.ready {
             opacity: 1;
         }
 
+        /* Image Box takes up most of the space on top */
+        .image-box-area {
+            width: 100%;
+            flex-grow: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            position: relative;
+        }
+
         .scenario-img {
-            width: 100%; height: 100%; object-fit: contain; position: absolute; top:0; left:0; z-index: 2;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
         }
         
-        /* Text acts as a clean caption underneath if image fails */
-        .fallback-box {
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            z-index: 1; text-align: center; width: 100%; height: 100%;
+        /* Dedicated Caption Area at the bottom so text never gets buried */
+        .caption-bar-area {
+            width: 100%;
+            text-align: center;
+            padding: 6px 5px 2px 5px;
+            box-sizing: border-box;
+            background-color: rgba(14, 165, 233, 0.06);
+            border-radius: 10px;
+            margin-top: 5px;
+            flex-shrink: 0;
         }
-        .fallback-emoji { font-size: 3rem; margin-bottom: 5px; }
+        
+        .fallback-emoji { font-size: 2.2rem; margin-bottom: 2px; }
         .fallback-text { font-size: 1.1rem; font-weight: bold; color: #212529; line-height: 1.3; }
         
         .audio-control-deck { margin: 8px 0; flex-shrink: 0; }
@@ -155,6 +175,7 @@
             .choice-card { height: 75px; }
             .choice-text { font-size: 1.4rem; }
             .choice-icon { font-size: 1.7rem; }
+            .fallback-text { font-size: 1rem; }
         }
 
         @media (max-height: 450px) and (orientation: landscape) {
@@ -163,8 +184,9 @@
             p { font-size: 0.9rem; margin-bottom: 8px; }
             .score-bar { font-size: 1rem; margin-bottom: 2px; }
             .scenario-graphic-card { max-height: 38vh; border-width: 3px; border-radius: 12px; }
-            .fallback-emoji { font-size: 2rem; margin-bottom: 2px; }
-            .fallback-text { font-size: 0.95rem; }
+            .fallback-emoji { font-size: 1.5rem; margin-bottom: 0px; }
+            .fallback-text { font-size: 0.85rem; }
+            .caption-bar-area { padding: 3px 5px; margin-top: 2px; }
             .audio-control-deck { margin: 4px 0; }
             .audio-btn-whole { padding: 4px 12px; font-size: 0.85rem; border-radius: 8px; }
             .choices-grid { gap: 8px; }
@@ -181,7 +203,7 @@
 <div id="gameApp">
     <div id="startScreen" class="screen active">
         <h1>禮貌小先鋒! 🚀</h1>
-        <p>睇下圖畫，聽一聽，揀個合適嘅回應啦！</p>
+        <p>睇下圖畫，揀個合適嘅回應啦！</p>
         <button class="btn-prime" onclick="startGame()">開始遊戲</button>
     </div>
 
@@ -189,13 +211,21 @@
         <div class="score-bar" id="scoreDisplay">🌟 得分: 0 / 5</div>
         
         <div class="scenario-graphic-card">
-            <!-- This container holds everything inside until sync conditions are met -->
+            <!-- Sync wrapper that holds distinct top and bottom zones -->
             <div id="syncWrapper" class="sync-content-wrapper">
-                <div class="fallback-box">
-                    <div class="fallback-emoji" id="scenEmoji">✏️</div>
+                
+                <!-- TOP ZONE: The Illustration Image -->
+                <div class="image-box-area">
+                    <!-- Clean emoji used contextually if image fails to load -->
+                    <div class="fallback-emoji" id="scenEmoji" style="display:none;">✏️</div>
+                    <img src="" id="scenImage" class="scenario-img" alt="Scenario Graphic" onerror="handleImageError()" onload="handleImageSuccess()">
+                </div>
+                
+                <!-- BOTTOM ZONE: The Structured Text Caption Bar -->
+                <div class="caption-bar-area">
                     <div class="fallback-text" id="scenText">載入中...</div>
                 </div>
-                <img src="" id="scenImage" class="scenario-img" alt="Scenario Graphic" onerror="handleImageError()" onload="handleImageSuccess()">
+
             </div>
         </div>
         
@@ -206,7 +236,7 @@
     </div>
 
     <div id="winScreen" class="screen">
-        <h1 style="color: #0CA678;">你好比心機呀！你完成挑戰喇！ 🎉</h1>
+        h1 style="color: #0CA678;">你好比心機呀！你完成挑戰喇！ 🎉</h1>
         <div style="font-size: 4rem; margin: 5px 0;">⭐⭐⭐⭐⭐</div>
         <button class="btn-prime" onclick="resetToMenu()">再玩一次</button>
     </div>
@@ -247,13 +277,15 @@ let score = 0;
 let activeAudio = null;
 
 function handleImageError() {
-    // If image fails, hide it and reveal the caption layout instantly
+    // If the image fails to load, hide image element and show the big emoji instead
     document.getElementById('scenImage').style.display = 'none';
+    document.getElementById('scenEmoji').style.display = 'block';
     document.getElementById('syncWrapper').classList.add('ready');
 }
 
 function handleImageSuccess() {
-    // If image loads successfully, show it and reveal the full box instantly
+    // If image loads successfully, ensure emoji is hidden and image shows clearly
+    document.getElementById('scenEmoji').style.display = 'none';
     document.getElementById('scenImage').style.display = 'block';
     document.getElementById('syncWrapper').classList.add('ready');
 }
@@ -288,14 +320,14 @@ function nextRound() {
     document.getElementById('scoreDisplay').innerText = `🌟 得分: ${score} / 5`;
     currentItem = gameActiveList.pop();
     
-    // 1. Hide the wrapper completely before altering content
+    // Reset wrapper opacity back to hidden for clean load
     document.getElementById('syncWrapper').classList.remove('ready');
     
-    // 2. Set backend values
+    // Set text strings
     document.getElementById('scenEmoji').innerText = currentItem.emoji;
     document.getElementById('scenText').innerText = currentItem.text;
     
-    // 3. Update image target path (triggers onload/onerror when ready)
+    // Trigger image loading
     const imgElement = document.getElementById('scenImage');
     imgElement.style.display = 'none'; 
     imgElement.src = AUDIO_FOLDER + currentItem.imgFile;
